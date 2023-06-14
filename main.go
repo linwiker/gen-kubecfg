@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 	"path"
@@ -46,7 +47,7 @@ func main() {
 		log.Fatalf("get cluster name from kubeConfig err: %v", err)
 	}
 
-	cm, err := clientSet.CoreV1().ConfigMaps("kube-system").Get(caConfigMap, metav1.GetOptions{})
+	cm, err := clientSet.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), caConfigMap, metav1.GetOptions{})
 	if err != nil {
 		log.Fatalf("get config map %s err %w", caConfigMap, err)
 	}

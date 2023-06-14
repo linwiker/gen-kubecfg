@@ -2,7 +2,7 @@ package generate
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/cloudflare/cfssl/log"
 	kubecmd "k8s.io/client-go/tools/clientcmd"
@@ -10,7 +10,7 @@ import (
 )
 
 func GetClusterName(kubeConfig string) (string, error) {
-	data, err := ioutil.ReadFile(kubeConfig)
+	data, err := os.ReadFile(kubeConfig)
 	if err != nil {
 		return "", err
 	}
@@ -67,7 +67,7 @@ func KubeConfig(input Params) {
 	}
 	filename := input.SaveAsFile()
 
-	if err := ioutil.WriteFile(filename, c, 0644); err != nil {
+	if err := os.WriteFile(filename, c, 0644); err != nil {
 		log.Errorf("write kubeconfig file err: %v", err)
 		return
 	}

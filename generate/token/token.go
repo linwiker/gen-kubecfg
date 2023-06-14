@@ -1,6 +1,7 @@
 package token
 
 import (
+	"context"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/cloudflare/cfssl/log"
 	"github.com/yahaa/gen-kubecfg/generate"
@@ -143,17 +144,17 @@ func (g *tokenKubeconfig) PreGenerate(p *generate.Params) {
 			},
 		}
 
-		if _, err := g.clientSet.CoreV1().ServiceAccounts(p.ServiceAccountNamespace).Create(sa); err != nil {
+		if _, err := g.clientSet.CoreV1().ServiceAccounts(p.ServiceAccountNamespace).Create(context.TODO(), sa, metav1.CreateOptions{}); err != nil {
 			log.Fatalf("service account create err: %v", err)
 		}
 	}
 
-	sa, err := g.clientSet.CoreV1().ServiceAccounts(p.ServiceAccountNamespace).Get(p.Username, metav1.GetOptions{})
+	sa, err := g.clientSet.CoreV1().ServiceAccounts(p.ServiceAccountNamespace).Get(context.TODO(), p.Username, metav1.GetOptions{})
 	if err != nil {
 		log.Fatalf("got service account err: %v", err)
 	}
 
-	secret, err := g.clientSet.CoreV1().Secrets(p.ServiceAccountNamespace).Get(sa.Secrets[0].Name, metav1.GetOptions{})
+	secret, err := g.clientSet.CoreV1().Secrets(p.ServiceAccountNamespace).Get(context.TODO(), sa.Secrets[0].Name, metav1.GetOptions{})
 	if err != nil {
 		log.Fatalf("got service account err: %v", err)
 	}
