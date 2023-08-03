@@ -7,7 +7,7 @@ kubeconfig 生成工具
 依赖 `go 1.18+`
 
 ```bash
-$ go install github.com/yahaa/gen-kubecfg@latest
+$ go install github.com/linwiker/gen-kubecfg@latest
 ```
 
 ### 使用
