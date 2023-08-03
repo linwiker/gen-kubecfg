@@ -4,7 +4,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	cfssl "github.com/cloudflare/cfssl/csr"
 	"github.com/cloudflare/cfssl/log"
-	"github.com/yahaa/gen-kubecfg/generate"
+	"github.com/linwiker/gen-kubecfg/generate"
 )
 
 // BundleCert 证书

@@ -4,10 +4,11 @@ import (
 	"context"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/cloudflare/cfssl/log"
-	"github.com/yahaa/gen-kubecfg/generate"
+	"github.com/linwiker/gen-kubecfg/generate"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"time"
 )
 
 type tokenKubeconfig struct {
@@ -138,25 +139,61 @@ func (g *tokenKubeconfig) PreGenerate(p *generate.Params) {
 				log.Fatalf("service account \"%s\" already exist !", name)
 			}
 		}
+
 		sa := &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: p.Username,
+			},
+			Secrets: []corev1.ObjectReference{
+				{
+					Namespace: p.Namespaces,
+					Name:      p.Username,
+				},
 			},
 		}
 
 		if _, err := g.clientSet.CoreV1().ServiceAccounts(p.ServiceAccountNamespace).Create(context.TODO(), sa, metav1.CreateOptions{}); err != nil {
 			log.Fatalf("service account create err: %v", err)
 		}
+
+		sec := &corev1.Secret{
+			TypeMeta: metav1.TypeMeta{},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      p.Username,
+				Namespace: p.Namespaces,
+				Annotations: map[string]string{
+					"kubernetes.io/service-account.name": p.Username,
+				},
+			},
+			Type: corev1.SecretTypeServiceAccountToken,
+		}
+
+		if _, err := g.clientSet.CoreV1().Secrets(p.Namespaces).Create(context.TODO(), sec, metav1.CreateOptions{}); err != nil {
+			log.Fatalf("create secret err: %v", err)
+		}
 	}
 
 	sa, err := g.clientSet.CoreV1().ServiceAccounts(p.ServiceAccountNamespace).Get(context.TODO(), p.Username, metav1.GetOptions{})
 	if err != nil {
-		log.Fatalf("got service account err: %v", err)
+		log.Fatalf("get service account err: %v", err)
 	}
 
-	secret, err := g.clientSet.CoreV1().Secrets(p.ServiceAccountNamespace).Get(context.TODO(), sa.Secrets[0].Name, metav1.GetOptions{})
+	var secret *corev1.Secret
+	var count int
+	secret, err = g.clientSet.CoreV1().Secrets(p.ServiceAccountNamespace).Get(context.TODO(), sa.Secrets[0].Name, metav1.GetOptions{})
 	if err != nil {
-		log.Fatalf("got service account err: %v", err)
+		log.Fatalf("get secrets err: %v", err)
+	}
+	for string(secret.Data["token"]) == "" {
+		time.Sleep(time.Second * 1)
+		secret, err = g.clientSet.CoreV1().Secrets(p.ServiceAccountNamespace).Get(context.TODO(), sa.Secrets[0].Name, metav1.GetOptions{})
+		if err != nil {
+			log.Fatalf("get secrets err: %v", err)
+		}
+		count++
+		if count == 5 {
+			log.Fatal("get secret timeout")
+		}
 	}
 
 	p.Token = string(secret.Data["token"])

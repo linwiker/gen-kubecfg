@@ -11,10 +11,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/yahaa/gen-kubecfg/generate"
-	"github.com/yahaa/gen-kubecfg/generate/cert"
-	"github.com/yahaa/gen-kubecfg/generate/token"
-	"github.com/yahaa/gen-kubecfg/utils"
+	"github.com/linwiker/gen-kubecfg/generate"
+	"github.com/linwiker/gen-kubecfg/generate/cert"
+	"github.com/linwiker/gen-kubecfg/generate/token"
+	"github.com/linwiker/gen-kubecfg/utils"
 )
 
 var (

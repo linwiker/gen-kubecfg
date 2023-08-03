@@ -1,4 +1,4 @@
-module github.com/yahaa/gen-kubecfg
+module github.com/linwiker/gen-kubecfg
 
 go 1.18
 
